@@ -15,8 +15,7 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-// test message for git branch number 5
-//   1 3334t73rt64gtfb
+
 public class BeaconClickListener implements Listener {
     private final List<Location> beaconCoordinates = new ArrayList<>();
     private final String dataFilePath = "plugins/Test123/beacon_data.json";
