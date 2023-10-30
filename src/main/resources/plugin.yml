@@ -1,0 +1,4 @@
+name: test123
+version: '${project.version}'
+main: me.sander.test123.Test123
+api-version: '1.20'
