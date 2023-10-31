@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BeaconClickListener implements Listener {
-    private final List<Location> beaconCoordinates = new ArrayList<>();
+    private final List<BeaconCoordinate> beaconCoordinates = new ArrayList<>();
     private final String dataFilePath = "plugins/Test123/beacon_data.json";
 
     public BeaconClickListener() {
@@ -33,7 +33,7 @@ public class BeaconClickListener implements Listener {
             Location location = beacon.getLocation();
 
             // Add the beacon's location to the ArrayList
-            beaconCoordinates.add(location);
+            beaconCoordinates.add(new BeaconCoordinate(location, location.getWorld().getName()));
 
             // Save the updated coordinates to the JSON file
             saveCoordinatesToJson();
@@ -49,23 +49,26 @@ public class BeaconClickListener implements Listener {
         else if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.STONE) {
             // Print the entire ArrayList to the console
             Bukkit.getLogger().info("Beacon Coordinates:");
-            for (Location location : beaconCoordinates) {
+            for (BeaconCoordinate beacon : beaconCoordinates) {
+                Location location = beacon.getLocation();
                 int x = location.getBlockX();
                 int y = location.getBlockY();
                 int z = location.getBlockZ();
-                Bukkit.getLogger().info("X=" + x + ", Y=" + y + ", Z=" + z);
+                String worldName = beacon.getWorldName();
+                Bukkit.getLogger().info("Beacon Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z);
             }
         }
     }
 
     private void saveCoordinatesToJson() {
         JSONArray jsonArray = new JSONArray();
-        for (Location location : beaconCoordinates) {
+        for (BeaconCoordinate beacon : beaconCoordinates) {
             JSONObject locationObject = new JSONObject();
+            Location location = beacon.getLocation();
             locationObject.put("X", location.getBlockX());
             locationObject.put("Y", location.getBlockY());
             locationObject.put("Z", location.getBlockZ());
-            locationObject.put("World", location.getWorld().getName()); // Add the world name
+            locationObject.put("World", beacon.getWorldName());
             jsonArray.add(locationObject);
         }
 
@@ -87,7 +90,7 @@ public class BeaconClickListener implements Listener {
                     int y = ((Long) locationObject.get("Y")).intValue();
                     int z = ((Long) locationObject.get("Z")).intValue();
                     String worldName = (String) locationObject.get("World");
-                    beaconCoordinates.add(new Location(Bukkit.getWorld(worldName), x, y, z));
+                    beaconCoordinates.add(new BeaconCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName));
                 }
             }
         } catch (IOException | ParseException e) {

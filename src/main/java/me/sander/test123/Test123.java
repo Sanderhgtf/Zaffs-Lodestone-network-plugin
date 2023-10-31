@@ -6,8 +6,9 @@ public final class Test123 extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Register your listener for beacon interactions
+        // Register your listeners
         getServer().getPluginManager().registerEvents(new BeaconClickListener(), this);
+        getServer().getPluginManager().registerEvents(new NetherStarClickListener(getLogger()), this);
 
         // Ensure the data folder exists, creating it if necessary
         if (!getDataFolder().exists()) {
