@@ -7,6 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BeaconClickListener implements Listener {
-    private final List<BeaconCoordinate> beaconCoordinates = new ArrayList<>();
-    private final String dataFilePath = "plugins/Test123/beacon_data.json";
+    private final List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
+    private final String dataFilePath = "plugins/Test123/lodestone_data.json";
 
     public BeaconClickListener() {
         loadCoordinatesFromJson();
@@ -26,49 +27,47 @@ public class BeaconClickListener implements Listener {
 
     @EventHandler
     public void onBeaconClick(PlayerInteractEvent event) {
-        // Check if the player left-clicked a beacon
-        if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.BEACON) {
-            // Get the beacon's location
-            Block beacon = event.getClickedBlock();
-            Location location = beacon.getLocation();
+        // Check if the player right-clicked a lodestone while holding a Nether Star
+        if (event.getAction().toString().contains("RIGHT")) {
+            ItemStack itemInHand = event.getItem();
+            if (itemInHand != null && itemInHand.getType() == Material.NETHER_STAR) {
+                Block lodestone = event.getClickedBlock();
+                Location location = lodestone.getLocation();
+                String worldName = location.getWorld().getName();
 
-            // Add the beacon's location to the ArrayList
-            beaconCoordinates.add(new BeaconCoordinate(location, location.getWorld().getName()));
+                // Check if the coordinates + world are already stored
+                if (!isCoordinatesStored(location, worldName)) {
+                    // Remove a Nether Star from the player's hand
+                    itemInHand.setAmount(itemInHand.getAmount() - 1);
 
-            // Save the updated coordinates to the JSON file
-            saveCoordinatesToJson();
+                    // Store the lodestone's location
+                    lodestoneCoordinates.add(new LodestoneCoordinate(location, worldName));
 
-            // Print the beacon's coordinates with world name to the console
-            int x = location.getBlockX();
-            int y = location.getBlockY();
-            int z = location.getBlockZ();
-            String worldName = location.getWorld().getName();
-            Bukkit.getLogger().info("Beacon Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z);
-        }
-        // Check if the player left-clicked a stone block
-        else if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.STONE) {
-            // Print the entire ArrayList to the console
-            Bukkit.getLogger().info("Beacon Coordinates:");
-            for (BeaconCoordinate beacon : beaconCoordinates) {
-                Location location = beacon.getLocation();
-                int x = location.getBlockX();
-                int y = location.getBlockY();
-                int z = location.getBlockZ();
-                String worldName = beacon.getWorldName();
-                Bukkit.getLogger().info("Beacon Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z);
+                    // Save the updated coordinates to the JSON file
+                    saveCoordinatesToJson();
+
+                    // Print the lodestone's coordinates with the world name to the console
+                    int x = location.getBlockX();
+                    int y = location.getBlockY();
+                    int z = location.getBlockZ();
+                    Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z);
+                } else {
+                    // Print "This is already a lodestone position" to the console
+                    Bukkit.getLogger().info("This is already a lodestone position");
+                }
             }
         }
     }
 
     private void saveCoordinatesToJson() {
         JSONArray jsonArray = new JSONArray();
-        for (BeaconCoordinate beacon : beaconCoordinates) {
+        for (LodestoneCoordinate lodestone : lodestoneCoordinates) {
             JSONObject locationObject = new JSONObject();
-            Location location = beacon.getLocation();
+            Location location = lodestone.getLocation();
             locationObject.put("X", location.getBlockX());
             locationObject.put("Y", location.getBlockY());
             locationObject.put("Z", location.getBlockZ());
-            locationObject.put("World", beacon.getWorldName());
+            locationObject.put("World", lodestone.getWorldName());
             jsonArray.add(locationObject);
         }
 
@@ -90,11 +89,21 @@ public class BeaconClickListener implements Listener {
                     int y = ((Long) locationObject.get("Y")).intValue();
                     int z = ((Long) locationObject.get("Z")).intValue();
                     String worldName = (String) locationObject.get("World");
-                    beaconCoordinates.add(new BeaconCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName));
+                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName));
                 }
             }
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isCoordinatesStored(Location location, String worldName) {
+        // Check if the coordinates + world are already stored
+        for (LodestoneCoordinate lodestone : lodestoneCoordinates) {
+            if (lodestone.getLocation().equals(location) && lodestone.getWorldName().equals(worldName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

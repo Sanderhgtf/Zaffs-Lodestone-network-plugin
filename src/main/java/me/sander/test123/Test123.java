@@ -8,7 +8,7 @@ public final class Test123 extends JavaPlugin {
     public void onEnable() {
         // Register your listeners
         getServer().getPluginManager().registerEvents(new BeaconClickListener(), this);
-        getServer().getPluginManager().registerEvents(new NetherStarClickListener(getLogger()), this);
+        getServer().getPluginManager().registerEvents(new LodestoneRemover(), this);
 
         // Ensure the data folder exists, creating it if necessary
         if (!getDataFolder().exists()) {

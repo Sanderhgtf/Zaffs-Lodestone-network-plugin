@@ -2,11 +2,11 @@ package me.sander.test123;
 
 import org.bukkit.Location;
 
-public class BeaconCoordinate {
+public class LodestoneCoordinate {
     private Location location;
     private String worldName;
 
-    public BeaconCoordinate(Location location, String worldName) {
+    public LodestoneCoordinate(Location location, String worldName) {
         this.location = location;
         this.worldName = worldName;
     }
