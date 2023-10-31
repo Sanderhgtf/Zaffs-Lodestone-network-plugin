@@ -1,9 +1,8 @@
 package me.sander.test123;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -27,6 +26,7 @@ public class BeaconClickListener implements Listener {
 
     @EventHandler
     public void onBeaconClick(PlayerInteractEvent event) {
+        Player player = event.getPlayer(); // Get the player
         // Check if the player right-clicked a lodestone while holding a Nether Star
         if (event.getAction().toString().contains("RIGHT")) {
             ItemStack itemInHand = event.getItem();
@@ -37,6 +37,9 @@ public class BeaconClickListener implements Listener {
 
                 // Check if the coordinates + world are already stored
                 if (!isCoordinatesStored(location, worldName)) {
+
+                    // yee yee ass block change here
+
                     // Remove a Nether Star from the player's hand
                     itemInHand.setAmount(itemInHand.getAmount() - 1);
 
@@ -51,12 +54,34 @@ public class BeaconClickListener implements Listener {
                     int y = location.getBlockY();
                     int z = location.getBlockZ();
                     Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z);
+
+                    // Send an action bar message to the player
+                    sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
+
+                    // Play a sound to all players within a 15-block radius
+                    Location soundLocation = location; // Use the location where the lodestone was constructed
+
+                    for (Player nearbyPlayer : location.getWorld().getPlayers()) {
+                        if (nearbyPlayer.getLocation().distance(soundLocation) <= 15) {
+                            // Adjust the sound parameters as needed (you can find available sounds in Sound category)
+                            nearbyPlayer.playSound(soundLocation, Sound.ENTITY_VILLAGER_WORK_WEAPONSMITH, 1.2F, 0.35F);
+                        }
+                    }
+
+
+                    PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
+                    // PLACE THE METHOD HERE WHICH IS RESPONSIBLE FOR RELOADING THE PLUGIN
                 } else {
                     // Print "This is already a lodestone position" to the console
                     Bukkit.getLogger().info("This is already a lodestone position");
                 }
             }
         }
+    }
+
+    // Send an action bar message to the player
+    private void sendActionBarMessage(Player player, String message) {
+        player.sendTitle("", message, 0, 20 * 2, 10);
     }
 
     private void saveCoordinatesToJson() {
