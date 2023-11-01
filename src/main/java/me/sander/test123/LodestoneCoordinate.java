@@ -4,7 +4,7 @@ import org.bukkit.Location;
 
 public class LodestoneCoordinate {
 
-    //
+    ///
 
     private Location location;
     private String worldName;

@@ -8,7 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class StoneRightClickListener implements Listener {
 
-    //
+    ///
 
     private final JavaPlugin plugin;
 

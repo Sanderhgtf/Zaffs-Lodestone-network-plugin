@@ -18,7 +18,7 @@ import java.util.List;
 
 public class BeaconClickListener implements Listener {
 
-    //
+    ///
 
     private final List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
     private final String dataFilePath = "plugins/Test123/lodestone_data.json";
