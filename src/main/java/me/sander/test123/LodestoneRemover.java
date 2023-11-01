@@ -12,24 +12,24 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LodestoneRemover implements Listener {
     private final String dataFilePath = "plugins/Test123/lodestone_data.json";
     private List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
+    private GhostLodestoneCleaner ghostLodestoneCleaner;
 
-    public LodestoneRemover() {
+    public LodestoneRemover(Test123 test123) {
         loadCoordinatesFromJson();
+        ghostLodestoneCleaner = new GhostLodestoneCleaner();
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         if (event.getBlock().getType() == Material.LODESTONE) {
-            Player player = event.getPlayer(); // Get the player who broke the block
+            Player player = event.getPlayer();
             Location location = event.getBlock().getLocation();
             String worldName = location.getWorld().getName();
 
@@ -44,7 +44,7 @@ public class LodestoneRemover implements Listener {
 
                 for (Player nearbyPlayer : location.getWorld().getPlayers()) {
                     if (nearbyPlayer.getLocation().distance(location) <= radius) {
-                        int durationSeconds = 7; // Duration in seconds
+                        int durationSeconds = 4; // Duration in seconds
                         int durationTicks = durationSeconds * 20; // Convert seconds to ticks
 
                         // Apply the Blindness effect to nearby players
@@ -54,17 +54,8 @@ public class LodestoneRemover implements Listener {
                     }
                 }
 
-                // Play a sound to all players within a 15-block radius
-                Location soundLocation = location; // Use the location where the lodestone was constructed
-
-                for (Player nearbyPlayer : location.getWorld().getPlayers()) {
-                    if (nearbyPlayer.getLocation().distance(soundLocation) <= 15) {
-                        // Adjust the sound parameters as needed (you can find available sounds in the Sound category)
-                        nearbyPlayer.playSound(soundLocation, Sound.PARTICLE_SOUL_ESCAPE, 10.0F, 0.9F);
-                        nearbyPlayer.playSound(soundLocation, Sound.PARTICLE_SOUL_ESCAPE, 8.0F, 1.0F);
-                        nearbyPlayer.playSound(soundLocation, Sound.PARTICLE_SOUL_ESCAPE, 9.0F, 0.8F);
-                    }
-                }
+                // Call the cleanUp method from GhostLodestoneCleaner
+                ghostLodestoneCleaner.cleanUp(lodestoneCoordinates, location.getWorld());
 
                 PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
                 // PLACE THE METHOD HERE WHICH IS RESPONSIBLE FOR RELOADING THE PLUGIN
@@ -73,7 +64,6 @@ public class LodestoneRemover implements Listener {
             }
         }
     }
-
 
     // Send an action bar message to the player
     private void sendActionBarMessage(Player player, String message) {
@@ -107,6 +97,7 @@ public class LodestoneRemover implements Listener {
             jsonArray.writeJSONString(fileWriter);
         } catch (IOException e) {
             e.printStackTrace();
+            Bukkit.getLogger().severe("Error saving coordinates to JSON: " + e.getMessage());
         }
     }
 
@@ -126,6 +117,7 @@ public class LodestoneRemover implements Listener {
             }
         } catch (IOException | ParseException e) {
             e.printStackTrace();
+            Bukkit.getLogger().severe("Error loading coordinates from JSON: " + e.getMessage());
         }
     }
 }
