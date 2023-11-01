@@ -7,6 +7,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class StoneRightClickListener implements Listener {
+
+    //
+
     private final JavaPlugin plugin;
 
     public StoneRightClickListener(JavaPlugin plugin) {

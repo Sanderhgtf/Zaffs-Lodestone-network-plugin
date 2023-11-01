@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LodestoneRemover implements Listener {
+
+    //
+
     private final String dataFilePath = "plugins/Test123/lodestone_data.json";
     private List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
     private GhostLodestoneCleaner ghostLodestoneCleaner;

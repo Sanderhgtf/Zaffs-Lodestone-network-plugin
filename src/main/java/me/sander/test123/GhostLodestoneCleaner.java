@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GhostLodestoneCleaner {
+
+    //
+
     private final String dataFilePath = "plugins/Test123/lodestone_data.json"; // Define dataFilePath here
 
     public void cleanUp(List<LodestoneCoordinate> lodestoneCoordinates, World world) {
