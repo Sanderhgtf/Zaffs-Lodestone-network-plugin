@@ -18,8 +18,6 @@ import java.util.List;
 
 public class BeaconClickListener implements Listener {
 
-    ///
-
     private final List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
     private final String dataFilePath = "plugins/Test123/lodestone_data.json";
 
@@ -29,54 +27,36 @@ public class BeaconClickListener implements Listener {
 
     @EventHandler
     public void onBeaconClick(PlayerInteractEvent event) {
-        Player player = event.getPlayer(); // Get the player
+        Player player = event.getPlayer();
 
-        // Check if the player right-clicked a block while holding a Nether Star
         if (event.getAction().toString().contains("RIGHT")) {
             ItemStack itemInHand = event.getItem();
 
             if (itemInHand != null && itemInHand.getType() == Material.NETHER_STAR) {
+                if (!isNetherStarRenamed(itemInHand)) {
+                    player.sendMessage(ChatColor.RED + "Rename the Nether Star to what you want this lodestone to be called.");
+                    return;
+                }
+
                 Block clickedBlock = event.getClickedBlock();
 
-                // Check if the clicked block is a lodestone
                 if (clickedBlock != null && clickedBlock.getType() == Material.LODESTONE) {
                     Location location = clickedBlock.getLocation();
                     String worldName = location.getWorld().getName();
+                    String netherStarName = getNetherStarName(itemInHand);
 
-                    // Check if the coordinates + world are already stored
                     if (!isCoordinatesStored(location, worldName)) {
-                        // Remove a Nether Star from the player's hand
                         itemInHand.setAmount(itemInHand.getAmount() - 1);
-
-                        // Store the lodestone's location
-                        lodestoneCoordinates.add(new LodestoneCoordinate(location, worldName));
-
-                        // Save the updated coordinates to the JSON file
+                        lodestoneCoordinates.add(new LodestoneCoordinate(location, worldName, netherStarName));
                         saveCoordinatesToJson();
-
-                        // Print the lodestone's coordinates with the world name to the console
                         int x = location.getBlockX();
                         int y = location.getBlockY();
                         int z = location.getBlockZ();
-                        Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z);
-
-                        // Send an action bar message to the player
+                        Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z + " - Named: " + netherStarName);
                         sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
-
-                        // Play a sound to all players within a 15-block radius
-                        Location soundLocation = location; // Use the location where the lodestone was constructed
-
-                        for (Player nearbyPlayer : location.getWorld().getPlayers()) {
-                            if (nearbyPlayer.getLocation().distance(soundLocation) <= 15) {
-                                // Adjust the sound parameters as needed (you can find available sounds in Sound category)
-                                nearbyPlayer.playSound(soundLocation, Sound.ENTITY_VILLAGER_WORK_WEAPONSMITH, 1.2F, 0.35F);
-                            }
-                        }
-
+                        playSoundNearbyPlayers(location);
                         PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
-                        // PLACE THE METHOD HERE WHICH IS RESPONSIBLE FOR RELOADING THE PLUGIN
                     } else {
-                        // Print "This is already a lodestone position" to the console
                         Bukkit.getLogger().info("This is already a lodestone position");
                     }
                 }
@@ -84,8 +64,6 @@ public class BeaconClickListener implements Listener {
         }
     }
 
-
-    // Send an action bar message to the player
     private void sendActionBarMessage(Player player, String message) {
         player.sendTitle("", message, 0, 20 * 2, 10);
     }
@@ -99,6 +77,7 @@ public class BeaconClickListener implements Listener {
             locationObject.put("Y", location.getBlockY());
             locationObject.put("Z", location.getBlockZ());
             locationObject.put("World", lodestone.getWorldName());
+            locationObject.put("NetherStarName", lodestone.getNetherStarName());
             jsonArray.add(locationObject);
         }
 
@@ -120,7 +99,8 @@ public class BeaconClickListener implements Listener {
                     int y = ((Long) locationObject.get("Y")).intValue();
                     int z = ((Long) locationObject.get("Z")).intValue();
                     String worldName = (String) locationObject.get("World");
-                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName));
+                    String netherStarName = (String) locationObject.get("NetherStarName");
+                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName, netherStarName));
                 }
             }
         } catch (IOException | ParseException e) {
@@ -128,13 +108,34 @@ public class BeaconClickListener implements Listener {
         }
     }
 
+    private boolean isNetherStarRenamed(ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            return true;
+        }
+        return false;
+    }
+
     private boolean isCoordinatesStored(Location location, String worldName) {
-        // Check if the coordinates + world are already stored
         for (LodestoneCoordinate lodestone : lodestoneCoordinates) {
             if (lodestone.getLocation().equals(location) && lodestone.getWorldName().equals(worldName)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private String getNetherStarName(ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            return item.getItemMeta().getDisplayName();
+        }
+        return null;
+    }
+
+    private void playSoundNearbyPlayers(Location location) {
+        for (Player nearbyPlayer : location.getWorld().getPlayers()) {
+            if (nearbyPlayer.getLocation().distance(location) <= 15) {
+                nearbyPlayer.playSound(location, Sound.ENTITY_VILLAGER_WORK_WEAPONSMITH, 1.2F, 0.35F);
+            }
+        }
     }
 }

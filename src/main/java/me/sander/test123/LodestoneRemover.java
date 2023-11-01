@@ -1,5 +1,9 @@
 package me.sander.test123;
 
+import org.bukkit.Location;
+import org.bukkit.Bukkit;
+
+
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -115,7 +119,8 @@ public class LodestoneRemover implements Listener {
                     int y = ((Long) locationObject.get("Y")).intValue();
                     int z = ((Long) locationObject.get("Z")).intValue();
                     String worldName = (String) locationObject.get("World");
-                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName));
+                    String netherStarName = (String) locationObject.get("NetherStarName");
+                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName, netherStarName));
                 }
             }
         } catch (IOException | ParseException e) {
