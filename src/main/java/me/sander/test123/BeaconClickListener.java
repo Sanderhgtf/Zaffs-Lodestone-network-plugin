@@ -1,12 +1,16 @@
 package me.sander.test123;
 
-import org.bukkit.*;
-import org.bukkit.block.Block;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,11 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BeaconClickListener implements Listener {
-
-    private final List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
+    private final List<LodestoneCoordinate> lodestoneCoordinates;
     private final String dataFilePath = "plugins/Test123/lodestone_data.json";
 
-    public BeaconClickListener() {
+    public BeaconClickListener(List<LodestoneCoordinate> lodestoneCoordinates) {
+        this.lodestoneCoordinates = lodestoneCoordinates;
         loadCoordinatesFromJson();
     }
 
@@ -33,41 +37,39 @@ public class BeaconClickListener implements Listener {
             ItemStack itemInHand = event.getItem();
 
             if (itemInHand != null && itemInHand.getType() == Material.NETHER_STAR) {
-                Block clickedBlock = event.getClickedBlock();
+                Location clickedBlockLocation = event.getClickedBlock().getLocation();
+                String worldName = clickedBlockLocation.getWorld().getName();
+                String netherStarName = getNetherStarName(itemInHand);
 
-                if (clickedBlock != null && clickedBlock.getType() == Material.LODESTONE) {
-                    Location location = clickedBlock.getLocation();
-                    String worldName = location.getWorld().getName();
-                    String netherStarName = getNetherStarName(itemInHand);
-
-                    if (netherStarName == null || netherStarName.isEmpty()) {
-                        if (!isCoordinatesStored(location, worldName)) {// If the Nether Star is unnamed, and the coordinates are not stored, show this message.
-                            // If the Nether Star is unnamed, and the coordinates are not stored.
+                if (netherStarName == null || netherStarName.isEmpty()) {
+                    if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
+                        if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE && !clickedBlockLocation.getBlock().hasMetadata("Test123Activated")) {
                             player.sendMessage(ChatColor.YELLOW + "Rename the Nether Star to what you want this lodestone to be called.");
-                        } else {
-                            // If the Nether Star is named, and the coordinates are store.
-                            player.sendMessage(ChatColor.GOLD + "This lodestone has already been fully activated.");
                         }
                     } else {
-                        if (!isCoordinatesStored(location, worldName)) {
+                        //player.sendMessage(ChatColor.GOLD + "This lodestone has already been fully activated, also your nether star doesn't have a name.");
+                    }
+                } else if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
+                    if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE) {
                             itemInHand.setAmount(itemInHand.getAmount() - 1);
-                            lodestoneCoordinates.add(new LodestoneCoordinate(location, worldName, netherStarName));
+                            lodestoneCoordinates.add(new LodestoneCoordinate(clickedBlockLocation, worldName, netherStarName));
                             saveCoordinatesToJson();
-                            int x = location.getBlockX();
-                            int y = location.getBlockY();
-                            int z = location.getBlockZ();
-                            Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + x + ", Y=" + y + ", Z=" + z + ", Nether Star Name: " + netherStarName);
+                            Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + clickedBlockLocation.getBlockX() + ", Y=" + clickedBlockLocation.getBlockY() + ", Z=" + clickedBlockLocation.getBlockZ() + ", Nether Star Name: " + netherStarName);
                             sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
-                            playSoundNearbyPlayers(location);
+                            playSoundNearbyPlayers(clickedBlockLocation);
+                            clickedBlockLocation.getBlock().setMetadata("Test123Activated", new FixedMetadataValue(Test123.getPlugin(Test123.class), true));
                             PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
                         } else {
-                            Bukkit.getLogger().info("This is already a lodestone position");
-                        }
+                        player.sendMessage(ChatColor.GRAY + "I wonder what would happen if I used this on a lodestone..");
                     }
+                    } else {
+                    player.sendMessage(ChatColor.GOLD + "This is already a lodestone position");
+                }
                 }
             }
         }
-    }
+
+
 
 
     private String getNetherStarName(ItemStack item) {
@@ -129,6 +131,7 @@ public class BeaconClickListener implements Listener {
         }
         return false;
     }
+
     private void playSoundNearbyPlayers(Location location) {
         for (Player nearbyPlayer : location.getWorld().getPlayers()) {
             if (nearbyPlayer.getLocation().distance(location) <= 15) {
@@ -136,5 +139,4 @@ public class BeaconClickListener implements Listener {
             }
         }
     }
-
 }

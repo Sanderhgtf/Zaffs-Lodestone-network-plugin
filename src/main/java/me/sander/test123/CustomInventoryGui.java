@@ -8,29 +8,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.io.FileReader;
-import java.io.IOException;
+import org.bukkit.inventory.meta.ItemMeta;
+import java.util.List;
 
 public class CustomInventoryGui implements Listener {
     private final Inventory inventory;
+    private final List<LodestoneCoordinate> lodestoneCoordinates; // Change the variable name
 
-    public CustomInventoryGui() {
+    public CustomInventoryGui(List<LodestoneCoordinate> lodestoneCoordinates) { // Change the parameter name
         inventory = Bukkit.createInventory(null, 27, "Custom GUI");
-
-        // Fill the first slot with a Calcite block
-        inventory.setItem(0, new ItemStack(Material.CALCITE));
-
-        // Load data from the JSON file and determine the number of elements
-        int numElements = loadElementsFromJson();
-
-        // Fill the rest of the inventory with singular Calcite blocks
-        for (int i = 1; i < numElements && i < inventory.getSize(); i++) {
-            inventory.setItem(i, new ItemStack(Material.CALCITE));
-        }
+        this.lodestoneCoordinates = lodestoneCoordinates; // Change the variable name
+        loadNetherStarNames();
     }
 
     @EventHandler
@@ -40,7 +28,7 @@ public class CustomInventoryGui implements Listener {
         if (event.getAction().toString().contains("RIGHT") && event.getClickedBlock() != null &&
                 event.getClickedBlock().getType() == Material.CALCITE) {
             open(player);
-            event.setCancelled(true); // Prevent right-clicking the Calcite block
+            event.setCancelled(true); // Prevent right-clicking the calcite block
         }
     }
 
@@ -48,17 +36,15 @@ public class CustomInventoryGui implements Listener {
         player.openInventory(inventory);
     }
 
-    private int loadElementsFromJson() {
-        int numElements = 0;
-        JSONParser jsonParser = new JSONParser();
-
-        try (FileReader fileReader = new FileReader("plugins/Test123/lodestone_data.json")) {
-            JSONArray jsonArray = (JSONArray) jsonParser.parse(fileReader);
-            numElements = jsonArray.size();
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
+    public void loadNetherStarNames() {
+        // Fill the inventory with Calcite blocks named after NetherStarNames
+        for (LodestoneCoordinate lodestone : lodestoneCoordinates) { // Change the variable name
+            String netherStarName = lodestone.getNetherStarName(); // Assuming you have a getNetherStarName() method
+            ItemStack item = new ItemStack(Material.CALCITE);
+            ItemMeta itemMeta = item.getItemMeta();
+            itemMeta.setDisplayName(netherStarName);
+            item.setItemMeta(itemMeta);
+            inventory.addItem(item);
         }
-
-        return numElements;
     }
 }
