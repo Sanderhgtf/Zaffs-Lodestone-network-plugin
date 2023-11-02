@@ -26,7 +26,9 @@ public class CustomInventoryGui implements Listener {
     private final List<LodestoneCoordinate> lodestoneCoordinates;
 
     public CustomInventoryGui(List<LodestoneCoordinate> lodestoneCoordinates) {
-        inventory = Bukkit.createInventory(null, 27, "LODESTONE NETWORK");
+        int numActiveLodestones = lodestoneCoordinates.size();
+        int inventorySize = (int) (Math.ceil(numActiveLodestones / 9.0) * 9); // Round up to the nearest multiple of 9
+        inventory = Bukkit.createInventory(null, Math.min(inventorySize, 54), "LODESTONE NETWORK");
         this.lodestoneCoordinates = lodestoneCoordinates;
         loadNetherStarNames();
     }
@@ -60,8 +62,14 @@ public class CustomInventoryGui implements Listener {
                                 coordinate.getWorldName());
                         Bukkit.getLogger().info(message);
 
+                        // Get the player's original pitch and yaw
+                        float originalPitch = player.getLocation().getPitch();
+                        float originalYaw = player.getLocation().getYaw();
+
                         // Teleport the player one block above
                         Location targetLocation = coordinate.getLocation().clone().add(0.5, 1, 0.5);
+                        targetLocation.setPitch(originalPitch);
+                        targetLocation.setYaw(originalYaw);
                         player.teleport(targetLocation);
 
                         // Create a dark smoke particle effect
