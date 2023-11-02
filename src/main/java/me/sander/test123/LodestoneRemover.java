@@ -1,10 +1,10 @@
 package me.sander.test123;
 
-import org.bukkit.Location;
 import org.bukkit.Bukkit;
-
-
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LodestoneRemover implements Listener {
-
-    ///
 
     private final String dataFilePath = "plugins/Test123/lodestone_data.json";
     private List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
@@ -43,36 +41,30 @@ public class LodestoneRemover implements Listener {
             if (removeCoordinatesFromJson(location, worldName)) {
                 Bukkit.getLogger().info("This lodestone had stored data which is now removed");
 
-                // Send an action bar message to the player
                 sendActionBarMessage(player, ChatColor.GOLD + "Lodestone disassembled..");
 
-                // Apply Blindness to players within a 15-block radius
-                int radius = 15; // Define the radius
+                int radius = 15;
 
                 for (Player nearbyPlayer : location.getWorld().getPlayers()) {
                     if (nearbyPlayer.getLocation().distance(location) <= radius) {
-                        int durationSeconds = 4; // Duration in seconds
-                        int durationTicks = durationSeconds * 20; // Convert seconds to ticks
+                        int durationSeconds = 4;
+                        int durationTicks = durationSeconds * 20;
 
-                        // Apply the Blindness effect to nearby players
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, durationTicks, 5));
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, durationTicks, 5));
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, durationTicks, 2));
                     }
                 }
 
-                // Call the cleanUp method from GhostLodestoneCleaner
                 ghostLodestoneCleaner.cleanUp(lodestoneCoordinates, location.getWorld());
 
                 PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
-                // PLACE THE METHOD HERE WHICH IS RESPONSIBLE FOR RELOADING THE PLUGIN
             } else {
                 Bukkit.getLogger().info("This lodestone does not have stored data.");
             }
         }
     }
 
-    // Send an action bar message to the player
     private void sendActionBarMessage(Player player, String message) {
         player.sendTitle("", message, 0, 20 * 2, 10);
     }
@@ -97,6 +89,7 @@ public class LodestoneRemover implements Listener {
             locationObject.put("Y", location.getBlockY());
             locationObject.put("Z", location.getBlockZ());
             locationObject.put("World", lodestone.getWorldName());
+            locationObject.put("NetherStarName", lodestone.getNetherStarName());
             jsonArray.add(locationObject);
         }
 

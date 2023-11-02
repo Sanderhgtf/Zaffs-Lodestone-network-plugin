@@ -13,11 +13,11 @@ import java.util.List;
 
 public class CustomInventoryGui implements Listener {
     private final Inventory inventory;
-    private final List<LodestoneCoordinate> lodestoneCoordinates; // Change the variable name
+    private final List<LodestoneCoordinate> lodestoneCoordinates;
 
-    public CustomInventoryGui(List<LodestoneCoordinate> lodestoneCoordinates) { // Change the parameter name
+    public CustomInventoryGui(List<LodestoneCoordinate> lodestoneCoordinates) {
         inventory = Bukkit.createInventory(null, 27, "Custom GUI");
-        this.lodestoneCoordinates = lodestoneCoordinates; // Change the variable name
+        this.lodestoneCoordinates = lodestoneCoordinates;
         loadNetherStarNames();
     }
 
@@ -28,7 +28,7 @@ public class CustomInventoryGui implements Listener {
         if (event.getAction().toString().contains("RIGHT") && event.getClickedBlock() != null &&
                 event.getClickedBlock().getType() == Material.CALCITE) {
             open(player);
-            event.setCancelled(true); // Prevent right-clicking the calcite block
+            event.setCancelled(true);
         }
     }
 
@@ -38,8 +38,8 @@ public class CustomInventoryGui implements Listener {
 
     public void loadNetherStarNames() {
         // Fill the inventory with Calcite blocks named after NetherStarNames
-        for (LodestoneCoordinate lodestone : lodestoneCoordinates) { // Change the variable name
-            String netherStarName = lodestone.getNetherStarName(); // Assuming you have a getNetherStarName() method
+        for (LodestoneCoordinate lodestone : lodestoneCoordinates) {
+            String netherStarName = lodestone.getNetherStarName();
             ItemStack item = new ItemStack(Material.CALCITE);
             ItemMeta itemMeta = item.getItemMeta();
             itemMeta.setDisplayName(netherStarName);
