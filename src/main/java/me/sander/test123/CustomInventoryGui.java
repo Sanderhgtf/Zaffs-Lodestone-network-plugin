@@ -1,14 +1,17 @@
 package me.sander.test123;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
 import java.util.List;
 
 public class CustomInventoryGui implements Listener {
@@ -31,6 +34,40 @@ public class CustomInventoryGui implements Listener {
             event.setCancelled(true);
         }
     }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() == inventory) {
+            ItemStack clickedItem = event.getCurrentItem();
+            if (clickedItem != null && clickedItem.getType() == Material.CALCITE) {
+                String displayName = clickedItem.getItemMeta().getDisplayName();
+                Player player = (Player) event.getWhoClicked();
+
+                for (LodestoneCoordinate coordinate : lodestoneCoordinates) {
+                    if (coordinate.getNetherStarName().equals(displayName)) {
+                        String message = String.format("%s clicked: X=%d, Y=%d, Z=%d in World: %s",
+                                player.getName(),
+                                coordinate.getLocation().getBlockX(),
+                                coordinate.getLocation().getBlockY(),
+                                coordinate.getLocation().getBlockZ(),
+                                coordinate.getWorldName());
+                        Bukkit.getLogger().info(message);
+
+                        // Teleport the player one block above
+                        Location targetLocation = coordinate.getLocation().clone().add(0.5, 1, 0.5);
+                        player.teleport(targetLocation);
+
+                        event.setCancelled(true); // Prevent item movement
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
 
     public void open(Player player) {
         player.openInventory(inventory);

@@ -15,9 +15,11 @@ public final class Test123 extends JavaPlugin {
         // Create an instance of the BeaconClickListener and pass the LodestoneCoordinate data
         BeaconClickListener beaconClickListener = new BeaconClickListener(lodestoneCoordinates);
 
+        // Create an instance of the CustomInventoryGui and pass the LodestoneCoordinate data
+        CustomInventoryGui customGui = new CustomInventoryGui(lodestoneCoordinates);
+
         // Create instances of your other classes
         LodestoneRemover lodestoneRemover = new LodestoneRemover(this);
-        CustomInventoryGui customGui = new CustomInventoryGui(lodestoneCoordinates);
 
         // Register your listeners
         getServer().getPluginManager().registerEvents(beaconClickListener, this);
