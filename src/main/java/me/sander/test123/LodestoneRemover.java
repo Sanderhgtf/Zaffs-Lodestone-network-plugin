@@ -1,10 +1,6 @@
 package me.sander.test123;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -47,12 +43,16 @@ public class LodestoneRemover implements Listener {
 
                 for (Player nearbyPlayer : location.getWorld().getPlayers()) {
                     if (nearbyPlayer.getLocation().distance(location) <= radius) {
-                        int durationSeconds = 4;
+                        int durationSeconds = 2;
                         int durationTicks = durationSeconds * 20;
 
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, durationTicks, 5));
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, durationTicks, 5));
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, durationTicks, 2));
+
+                        // Play a sound for nearby players
+                        nearbyPlayer.playSound(location, Sound.AMBIENT_SOUL_SAND_VALLEY_ADDITIONS, 2.0F, 0.8F);
+                        nearbyPlayer.playSound(location, Sound.PARTICLE_SOUL_ESCAPE, 4.0F, 0.6F);
                     }
                 }
 

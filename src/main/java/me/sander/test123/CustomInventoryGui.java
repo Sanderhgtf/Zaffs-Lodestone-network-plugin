@@ -1,9 +1,6 @@
 package me.sander.test123;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,7 +11,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.Particle;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -34,15 +30,26 @@ public class CustomInventoryGui implements Listener {
     }
 
     @EventHandler
-    public void onRightClickCalcite(PlayerInteractEvent event) {
+    public void onRightClickLodestone(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         if (event.getAction().toString().contains("RIGHT") && event.getClickedBlock() != null &&
-                event.getClickedBlock().getType() == Material.CALCITE) {
-            open(player);
-            event.setCancelled(true);
+                event.getClickedBlock().getType() == Material.LODESTONE) {
+            // Get the location of the clicked lodestone
+            Location lodestoneLocation = event.getClickedBlock().getLocation();
+
+            // Check if a corresponding activated lodestone exists in the coordinates
+            if (lodestoneCoordinates.stream().anyMatch(coordinate ->
+                    coordinate.getLocation().getBlockX() == lodestoneLocation.getBlockX() &&
+                            coordinate.getLocation().getBlockY() == lodestoneLocation.getBlockY() &&
+                            coordinate.getLocation().getBlockZ() == lodestoneLocation.getBlockZ() &&
+                            coordinate.getLocation().getWorld().getName().equals(lodestoneLocation.getWorld().getName()))) {
+                open(player);
+                event.setCancelled(true);
+            }
         }
     }
+
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -59,7 +66,7 @@ public class CustomInventoryGui implements Listener {
                                 coordinate.getLocation().getBlockX(),
                                 coordinate.getLocation().getBlockY(),
                                 coordinate.getLocation().getBlockZ(),
-                                coordinate.getWorldName());
+                                coordinate.getNetherStarName()); // Display the Nether Star name
                         Bukkit.getLogger().info(message);
 
                         // Get the player's original pitch and yaw
@@ -72,10 +79,14 @@ public class CustomInventoryGui implements Listener {
                         targetLocation.setYaw(originalYaw);
                         player.teleport(targetLocation);
 
-                        // Create a dark smoke particle effect
-                        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                            onlinePlayer.spawnParticle(Particle.SMOKE_NORMAL, targetLocation, 100, 0.5, 1, 0.5, 0.1);
-                        }
+                        sendActionBarMessage(player, ChatColor.WHITE + coordinate.getNetherStarName()); // Display the Nether Star name
+
+                        // Play the BLOCK_ENCHANTMENT_TABLE_USE sound at the target location
+                        targetLocation.getWorld().playSound(targetLocation, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.5F, 0.2F);
+
+                        // Create a dark smoke particle effect for the player being teleported
+                        player.spawnParticle(Particle.SMOKE_NORMAL, targetLocation, 100, 0.5, 1, 0.5, 0.1);
+                        player.spawnParticle(Particle.ENCHANTMENT_TABLE, targetLocation, 100, 0.5, 1, 0.5, 0.1);
 
                         // Give the player the darkness effect for 2 seconds
                         PotionEffect darknessEffect = new PotionEffect(PotionEffectType.BLINDNESS, 20, 1);
@@ -89,8 +100,16 @@ public class CustomInventoryGui implements Listener {
         }
     }
 
+
+
+
     public void open(Player player) {
         player.openInventory(inventory);
+
+    }
+
+    private void sendActionBarMessage(Player player, String message) {
+        player.sendTitle("", message, 0, 20 * 2, 10);
     }
 
     public void loadNetherStarNames() {

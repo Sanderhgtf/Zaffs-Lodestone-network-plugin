@@ -43,11 +43,7 @@ public class BeaconClickListener implements Listener {
 
                 if (netherStarName == null || netherStarName.isEmpty()) {
                     if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
-                        if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE && !clickedBlockLocation.getBlock().hasMetadata("Test123Activated")) {
-                            player.sendMessage(ChatColor.YELLOW + "Rename the Nether Star to what you want this lodestone to be called.");
-                        }
-                    } else {
-                        //player.sendMessage(ChatColor.GOLD + "This lodestone has already been fully activated, also your nether star doesn't have a name.");
+                        player.sendMessage(ChatColor.YELLOW + "Rename the Nether Star to what you want this lodestone to be called.");
                     }
                 } else if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
                     if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE) {
