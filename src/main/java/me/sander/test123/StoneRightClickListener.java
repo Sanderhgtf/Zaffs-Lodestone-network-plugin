@@ -39,6 +39,7 @@ public class StoneRightClickListener implements Listener {
         // Check if the material is a candle of any color
         return material == Material.WHITE_CANDLE ||
                 material == Material.ORANGE_CANDLE ||
+                material == Material.CANDLE ||
                 material == Material.MAGENTA_CANDLE ||
                 material == Material.LIGHT_BLUE_CANDLE ||
                 material == Material.YELLOW_CANDLE ||

@@ -1,5 +1,7 @@
 package me.sander.test123;
 
+import org.bukkit.Color;
+import org.bukkit.Particle;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -35,6 +37,10 @@ public final class Test123 extends JavaPlugin {
         // Create an instance of the CustomInventoryGui and pass the LodestoneCoordinate data
         CustomInventoryGui customGui = new CustomInventoryGui(lodestoneCoordinates);
 
+        // Create an instance of the StoneRightClickListener and register it
+        StoneRightClickListener stoneRightClickListener = new StoneRightClickListener(this);
+        getServer().getPluginManager().registerEvents(stoneRightClickListener, this);
+
         // Create instances of your other classes
         LodestoneRemover lodestoneRemover = new LodestoneRemover(this);
 
@@ -42,7 +48,13 @@ public final class Test123 extends JavaPlugin {
         getServer().getPluginManager().registerEvents(beaconClickListener, this);
         getServer().getPluginManager().registerEvents(lodestoneRemover, this);
         getServer().getPluginManager().registerEvents(customGui, this);
+
+        // Register the RedstoneParticleScheduler
+        RedstoneParticleScheduler particleScheduler = new RedstoneParticleScheduler(lodestoneCoordinates);
     }
+
+
+
 
     @Override
     public void onDisable() {
