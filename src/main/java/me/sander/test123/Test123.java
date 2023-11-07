@@ -11,8 +11,11 @@ public final class Test123 extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // Ensure the data folder exists, creating it and the file if necessary
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
 
-        // Ensure the data folder exists, creating it if necessary
         File dataFile = new File(getDataFolder(), "lodestone_data.json");
         if (!dataFile.exists()) {
             try {
@@ -39,8 +42,6 @@ public final class Test123 extends JavaPlugin {
         getServer().getPluginManager().registerEvents(beaconClickListener, this);
         getServer().getPluginManager().registerEvents(lodestoneRemover, this);
         getServer().getPluginManager().registerEvents(customGui, this);
-
-
     }
 
     @Override
