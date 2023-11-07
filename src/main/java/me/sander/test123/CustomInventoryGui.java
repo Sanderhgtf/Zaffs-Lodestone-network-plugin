@@ -5,6 +5,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -26,43 +27,77 @@ public class CustomInventoryGui implements Listener {
         int inventorySize = (int) (Math.ceil(numActiveLodestones / 9.0) * 9); // Round up to the nearest multiple of 9
         inventory = Bukkit.createInventory(null, Math.min(inventorySize, 54), "LODESTONE NETWORK");
         this.lodestoneCoordinates = lodestoneCoordinates;
+        loadNetherStarNames(0, null); // Initial load without a selected index
     }
 
     @EventHandler
     public void onRightClickLodestone(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (event.getAction().toString().contains("RIGHT") && event.getClickedBlock() != null &&
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null &&
                 event.getClickedBlock().getType() == Material.LODESTONE) {
             // Get the location of the clicked lodestone
             Location lodestoneLocation = event.getClickedBlock().getLocation();
 
-            boolean matchingLodestone = false;
+            // Check if a corresponding activated lodestone exists in the coordinates
+            int selectedIndex = -1;
 
             for (int i = 0; i < lodestoneCoordinates.size(); i++) {
                 LodestoneCoordinate coordinate = lodestoneCoordinates.get(i);
-
                 if (coordinate.getLocation().getBlockX() == lodestoneLocation.getBlockX() &&
                         coordinate.getLocation().getBlockY() == lodestoneLocation.getBlockY() &&
                         coordinate.getLocation().getBlockZ() == lodestoneLocation.getBlockZ() &&
                         coordinate.getLocation().getWorld().getName().equals(lodestoneLocation.getWorld().getName())) {
-                    matchingLodestone = true;
-                    loadNetherStarNames(i, player.getLocation());
-                    open(player);
-                    event.setCancelled(true);
+                    selectedIndex = i;
                     break;
                 }
             }
 
-            if (!matchingLodestone) {
-                // Handle the case when no matching lodestone is found
-            }
+            loadNetherStarNames(selectedIndex, lodestoneLocation);
+            open(player);
+            event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        // Handle inventory click events as before
+        if (event.getClickedInventory() == inventory) {
+            event.setCancelled(true); // Prevent item movement
+
+            ItemStack clickedItem = event.getCurrentItem();
+            if (clickedItem != null && clickedItem.getType() == Material.COMPASS) {
+                Player player = (Player) event.getWhoClicked();
+                int slot = event.getRawSlot();
+                if (slot >= 0 && slot < inventory.getSize()) {
+                    LodestoneCoordinate coordinate = lodestoneCoordinates.get(slot);
+                    String message = String.format("%s clicked: X=%d, Y=%d, Z=%d in World: %s",
+                            player.getName(),
+                            coordinate.getLocation().getBlockX(),
+                            coordinate.getLocation().getBlockY(),
+                            coordinate.getLocation().getBlockZ(),
+                            coordinate.getNetherStarName());
+                    Bukkit.getLogger().info(message);
+
+                    float originalPitch = player.getLocation().getPitch();
+                    float originalYaw = player.getLocation().getYaw();
+
+                    Location targetLocation = coordinate.getLocation().clone().add(0.5, 1, 0.5);
+                    targetLocation.setPitch(originalPitch);
+                    targetLocation.setYaw(originalYaw);
+                    player.teleport(targetLocation);
+
+                    sendActionBarMessage(player, ChatColor.WHITE + coordinate.getNetherStarName());
+
+                    targetLocation.getWorld().playSound(targetLocation, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.5F, 0.2F);
+
+                    player.spawnParticle(Particle.SMOKE_NORMAL, targetLocation, 100, 0.5, 1, 0.5, 0.1);
+                    player.spawnParticle(Particle.ENCHANTMENT_TABLE, targetLocation, 100, 0.5, 1, 0.5, 0.1);
+
+                    PotionEffect darknessEffect = new PotionEffect(PotionEffectType.BLINDNESS, 20, 1);
+                    player.addPotionEffect(darknessEffect);
+                }
+            }
+        }
     }
 
     public void open(Player player) {
@@ -74,30 +109,25 @@ public class CustomInventoryGui implements Listener {
     }
 
     public void loadNetherStarNames(int selectedIndex, Location playerInteractingLocation) {
+        inventory.clear(); // Clear the existing items in the inventory
         for (int i = 0; i < lodestoneCoordinates.size(); i++) {
-            String netherStarName = lodestoneCoordinates.get(i).getNetherStarName();
+            LodestoneCoordinate lodestone = lodestoneCoordinates.get(i);
+            String netherStarName = lodestone.getNetherStarName();
             ItemStack item;
             ItemMeta itemMeta;
 
             if (i == selectedIndex) {
-                // Display the selected lodestone as a barrier and indicate the player's location
                 item = new ItemStack(Material.BARRIER);
                 itemMeta = item.getItemMeta();
                 itemMeta.setLore(Collections.singletonList(ChatColor.RED + "Your location"));
             } else {
-                // Display other lodestones as Compass items for teleportation
                 item = new ItemStack(Material.COMPASS);
                 itemMeta = item.getItemMeta();
                 itemMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Click to teleport"));
             }
 
-            // Apply the enchantment effect without any enchant name
             itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
-
-            // Create a custom ItemFlag to hide the enchantment name
             itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-
-            // Set the display name with custom chat color
             itemMeta.setDisplayName(ChatColor.YELLOW + netherStarName);
 
             item.setItemMeta(itemMeta);
