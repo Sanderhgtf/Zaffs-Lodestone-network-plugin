@@ -18,7 +18,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+//
 public class CustomInventoryGui implements Listener {
     private final Inventory inventory;
     private final List<LodestoneCoordinate> lodestoneCoordinates;
