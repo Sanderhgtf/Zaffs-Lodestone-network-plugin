@@ -47,23 +47,23 @@ public class BeaconClickListener implements Listener {
                     }
                 } else if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
                     if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE) {
-                            itemInHand.setAmount(itemInHand.getAmount() - 1);
-                            lodestoneCoordinates.add(new LodestoneCoordinate(clickedBlockLocation, worldName, netherStarName));
-                            saveCoordinatesToJson();
-                            Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + clickedBlockLocation.getBlockX() + ", Y=" + clickedBlockLocation.getBlockY() + ", Z=" + clickedBlockLocation.getBlockZ() + ", Nether Star Name: " + netherStarName);
-                            sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
-                            playSoundNearbyPlayers(clickedBlockLocation);
-                            clickedBlockLocation.getBlock().setMetadata("Test123Activated", new FixedMetadataValue(Test123.getPlugin(Test123.class), true));
-                            PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
-                        } else {
+                        itemInHand.setAmount(itemInHand.getAmount() - 1);
+                        lodestoneCoordinates.add(new LodestoneCoordinate(clickedBlockLocation, worldName, netherStarName));
+                        saveCoordinatesToJson();
+                        Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + clickedBlockLocation.getBlockX() + ", Y=" + clickedBlockLocation.getBlockY() + ", Z=" + clickedBlockLocation.getBlockZ() + ", Nether Star Name: " + netherStarName);
+                        sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
+                        playSoundNearbyPlayers(clickedBlockLocation);
+                        clickedBlockLocation.getBlock().setMetadata("Test123Activated", new FixedMetadataValue(Test123.getPlugin(Test123.class), true));
+                        PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
+                    } else {
                         player.sendMessage(ChatColor.GRAY + "I wonder what would happen if I used this on a lodestone..");
                     }
-                    } else {
+                } else {
                     player.sendMessage(ChatColor.GOLD + "This is already a lodestone position");
-                }
                 }
             }
         }
+    }
 
 
 

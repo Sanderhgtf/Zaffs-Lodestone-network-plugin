@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -112,25 +113,43 @@ public class CustomInventoryGui implements Listener {
 
     public void loadNetherStarNames(int selectedIndex, Location playerInteractingLocation) {
         inventory.clear(); // Clear the existing items in the inventory
+
         for (int i = 0; i < lodestoneCoordinates.size(); i++) {
             LodestoneCoordinate lodestone = lodestoneCoordinates.get(i);
             String netherStarName = lodestone.getNetherStarName();
+            int blocksAway = -1;
+
+            if (playerInteractingLocation != null && lodestone.getLocation().getWorld().equals(playerInteractingLocation.getWorld())) {
+                // Calculate the distance between the player's location and the lodestone location
+                blocksAway = (int) playerInteractingLocation.distance(lodestone.getLocation());
+            }
+
             ItemStack item;
             ItemMeta itemMeta;
 
             if (i == selectedIndex) {
                 item = new ItemStack(Material.BARRIER);
                 itemMeta = item.getItemMeta();
-                itemMeta.setLore(Collections.singletonList(ChatColor.RED + "Your location"));
+                itemMeta.setDisplayName(ChatColor.RED + "Your Location"); // Set custom name for the "your location" barrier
             } else {
                 item = new ItemStack(Material.COMPASS);
                 itemMeta = item.getItemMeta();
-                itemMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Click to teleport"));
+
+                List<String> lore = new ArrayList<>();
+                lore.add(ChatColor.GRAY + "Click to teleport");
+
+                if (blocksAway >= 0) {
+                    lore.add(ChatColor.AQUA + "Blocks Away: " + blocksAway); // Add blocks away line
+                } else {
+                    lore.add(ChatColor.RED + "In another dimension");
+                }
+
+                itemMeta.setLore(lore);
+                itemMeta.setDisplayName(ChatColor.YELLOW + netherStarName); // Set custom name for non-"your location" items
             }
 
             itemMeta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
             itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            itemMeta.setDisplayName(ChatColor.YELLOW + netherStarName);
 
             item.setItemMeta(itemMeta);
             inventory.addItem(item);
