@@ -67,10 +67,6 @@ public class BeaconClickListener implements Listener {
         }
     }
 
-
-
-
-
     private String getNetherStarName(ItemStack item) {
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
             return item.getItemMeta().getDisplayName();

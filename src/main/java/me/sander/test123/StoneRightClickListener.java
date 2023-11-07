@@ -53,6 +53,10 @@ public class StoneRightClickListener implements Listener {
                 material == Material.BROWN_CANDLE ||
                 material == Material.GREEN_CANDLE ||
                 material == Material.RED_CANDLE ||
+                material == Material.BEACON ||
+                material == Material.DIAMOND_BLOCK ||
+                material == Material.NETHERITE_BLOCK ||
+                material == Material.DRAGON_EGG ||
                 material == Material.BLACK_CANDLE;
     }
 }
