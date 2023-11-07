@@ -25,7 +25,7 @@ public class CustomInventoryGui implements Listener {
 
     public CustomInventoryGui(List<LodestoneCoordinate> lodestoneCoordinates) {
         int numActiveLodestones = lodestoneCoordinates.size();
-        int inventorySize = (int) (Math.ceil(numActiveLodestones / 9.0) * 9); // Round up to the nearest multiple of 9
+        int inventorySize = Math.max((int) (Math.ceil(numActiveLodestones / 9.0) * 9), 9);
         inventory = Bukkit.createInventory(null, Math.min(inventorySize, 54), "LODESTONE NETWORK");
         this.lodestoneCoordinates = lodestoneCoordinates;
         loadNetherStarNames(0, null); // Initial load without a selected index

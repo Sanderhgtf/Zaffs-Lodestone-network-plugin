@@ -1,6 +1,9 @@
 package me.sander.test123;
 
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +11,17 @@ public final class Test123 extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
+        // Ensure the data folder exists, creating it if necessary
+        File dataFile = new File(getDataFolder(), "lodestone_data.json");
+        if (!dataFile.exists()) {
+            try {
+                dataFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         // Create a list of LodestoneCoordinate data and add your data as needed
         List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
         // Add your LodestoneCoordinate objects to the list as needed
@@ -26,10 +40,7 @@ public final class Test123 extends JavaPlugin {
         getServer().getPluginManager().registerEvents(lodestoneRemover, this);
         getServer().getPluginManager().registerEvents(customGui, this);
 
-        // Ensure the data folder exists, creating it if necessary
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdirs();
-        }
+
     }
 
     @Override

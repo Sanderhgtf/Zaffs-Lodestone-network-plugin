@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.json.simple.JSONArray;
@@ -57,9 +56,6 @@ public class LodestoneRemover implements Listener {
                     }
                 }
 
-                // Drop a Nether Star alongside the Lodestone
-                location.getWorld().dropItem(location, new ItemStack(Material.NETHER_STAR));
-
                 ghostLodestoneCleaner.cleanUp(lodestoneCoordinates, location.getWorld());
 
                 PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
@@ -68,7 +64,6 @@ public class LodestoneRemover implements Listener {
             }
         }
     }
-
 
     private void sendActionBarMessage(Player player, String message) {
         player.sendTitle("", message, 0, 20 * 2, 10);
