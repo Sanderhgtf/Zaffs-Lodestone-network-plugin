@@ -53,9 +53,11 @@ public class CustomInventoryGui implements Listener {
                 }
             }
 
-            loadNetherStarNames(selectedIndex, lodestoneLocation);
-            open(player);
-            event.setCancelled(true);
+            if (selectedIndex != -1) {
+                loadNetherStarNames(selectedIndex, lodestoneLocation);
+                open(player);
+                event.setCancelled(true);
+            }
         }
     }
 
