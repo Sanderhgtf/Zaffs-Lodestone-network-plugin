@@ -73,6 +73,7 @@ public class GhostLodestoneCleaner {
             locationObject.put("Y", location.getBlockY());
             locationObject.put("Z", location.getBlockZ());
             locationObject.put("World", lodestone.getWorldName());
+            locationObject.put("NetherStarName", lodestone.getNetherStarName());
             jsonArray.add(locationObject);
         }
 

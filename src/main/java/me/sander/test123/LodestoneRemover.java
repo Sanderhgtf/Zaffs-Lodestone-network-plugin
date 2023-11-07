@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.json.simple.JSONArray;
@@ -35,6 +36,9 @@ public class LodestoneRemover implements Listener {
             String worldName = location.getWorld().getName();
 
             if (removeCoordinatesFromJson(location, worldName)) {
+
+                location.getWorld().dropItemNaturally(location, new ItemStack(Material.NETHER_STAR));
+
                 Bukkit.getLogger().info("This lodestone had stored data which is now removed");
 
                 sendActionBarMessage(player, ChatColor.GOLD + "Lodestone disassembled..");

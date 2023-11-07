@@ -141,7 +141,7 @@ public class CustomInventoryGui implements Listener {
                 if (blocksAway >= 0) {
                     lore.add(ChatColor.AQUA + "Blocks Away: " + blocksAway); // Add blocks away line
                 } else {
-                    lore.add(ChatColor.RED + "In another dimension");
+                    lore.add(ChatColor.AQUA + "In another dimension");
                 }
 
                 itemMeta.setLore(lore);
