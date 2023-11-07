@@ -8,6 +8,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -31,39 +32,41 @@ public class BeaconClickListener implements Listener {
 
     @EventHandler
     public void onBeaconClick(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
         Player player = event.getPlayer();
+        ItemStack itemInHand = event.getItem();
 
-        if (event.getAction().toString().contains("RIGHT")) {
-            ItemStack itemInHand = event.getItem();
+        if (itemInHand != null && itemInHand.getType() == Material.NETHER_STAR) {
+            Location clickedBlockLocation = event.getClickedBlock().getLocation();
+            String worldName = clickedBlockLocation.getWorld().getName();
+            String netherStarName = getNetherStarName(itemInHand);
 
-            if (itemInHand != null && itemInHand.getType() == Material.NETHER_STAR) {
-                Location clickedBlockLocation = event.getClickedBlock().getLocation();
-                String worldName = clickedBlockLocation.getWorld().getName();
-                String netherStarName = getNetherStarName(itemInHand);
-
-                if (netherStarName == null || netherStarName.isEmpty()) {
-                    if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
-                        player.sendMessage(ChatColor.YELLOW + "Rename the Nether Star to what you want this lodestone to be called.");
-                    }
-                } else if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
-                    if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE) {
-                        itemInHand.setAmount(itemInHand.getAmount() - 1);
-                        lodestoneCoordinates.add(new LodestoneCoordinate(clickedBlockLocation, worldName, netherStarName));
-                        saveCoordinatesToJson();
-                        Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + clickedBlockLocation.getBlockX() + ", Y=" + clickedBlockLocation.getBlockY() + ", Z=" + clickedBlockLocation.getBlockZ() + ", Nether Star Name: " + netherStarName);
-                        sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
-                        playSoundNearbyPlayers(clickedBlockLocation);
-                        clickedBlockLocation.getBlock().setMetadata("Test123Activated", new FixedMetadataValue(Test123.getPlugin(Test123.class), true));
-                        PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
-                    } else {
-                        player.sendMessage(ChatColor.GRAY + "I wonder what would happen if I used this on a lodestone..");
-                    }
-                } else {
-                    player.sendMessage(ChatColor.GOLD + "This is already a lodestone position");
+            if (netherStarName == null || netherStarName.isEmpty()) {
+                if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
+                    player.sendMessage(ChatColor.YELLOW + "Rename the Nether Star to what you want this lodestone to be called.");
                 }
+            } else if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
+                if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE) {
+                    itemInHand.setAmount(itemInHand.getAmount() - 1);
+                    lodestoneCoordinates.add(new LodestoneCoordinate(clickedBlockLocation, worldName, netherStarName));
+                    saveCoordinatesToJson();
+                    Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + clickedBlockLocation.getBlockX() + ", Y=" + clickedBlockLocation.getBlockY() + ", Z=" + clickedBlockLocation.getBlockZ() + ", Nether Star Name: " + netherStarName);
+                    sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
+                    playSoundNearbyPlayers(clickedBlockLocation);
+                    clickedBlockLocation.getBlock().setMetadata("Test123Activated", new FixedMetadataValue(Test123.getPlugin(Test123.class), true));
+                    PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
+                } else {
+                    player.sendMessage(ChatColor.GRAY + "I wonder what would happen if I used this on a lodestone..");
+                }
+            } else {
+                player.sendMessage(ChatColor.GOLD + "This is already a lodestone position");
             }
         }
     }
+
 
 
 
