@@ -1,5 +1,8 @@
 package me.sander.test123;
 
+import me.sander.test123.LodestoneCoordinate;
+import me.sander.test123.PluginReloader;
+import me.sander.test123.Test123;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -16,7 +19,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-//
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +54,13 @@ public class BeaconClickListener implements Listener {
             } else if (!isCoordinatesStored(clickedBlockLocation, worldName)) {
                 if (clickedBlockLocation.getBlock().getType() == Material.LODESTONE) {
                     itemInHand.setAmount(itemInHand.getAmount() - 1);
-                    lodestoneCoordinates.add(new LodestoneCoordinate(clickedBlockLocation, worldName, netherStarName));
+
+                    // Set default values for tier, experienceRequired, and experienceProgression
+                    int tier = 1;
+                    int experienceRequired = 1000;
+                    int experienceProgression = 0;
+
+                    lodestoneCoordinates.add(new LodestoneCoordinate(clickedBlockLocation, worldName, netherStarName, tier, experienceRequired, experienceProgression));
                     saveCoordinatesToJson();
                     Bukkit.getLogger().info("Lodestone Coordinates in " + worldName + ": X=" + clickedBlockLocation.getBlockX() + ", Y=" + clickedBlockLocation.getBlockY() + ", Z=" + clickedBlockLocation.getBlockZ() + ", Nether Star Name: " + netherStarName);
                     sendActionBarMessage(player, ChatColor.GREEN + "Lodestone constructed");
@@ -88,6 +97,9 @@ public class BeaconClickListener implements Listener {
             locationObject.put("Z", location.getBlockZ());
             locationObject.put("World", lodestone.getWorldName());
             locationObject.put("NetherStarName", lodestone.getNetherStarName());
+            locationObject.put("Tier", lodestone.getTier());  // Include tier in JSON
+            locationObject.put("ExperienceRequired", lodestone.getExperienceRequired());  // Include experienceRequired in JSON
+            locationObject.put("ExperienceProgression", lodestone.getExperienceProgression());  // Include experienceProgression in JSON
             jsonArray.add(locationObject);
         }
 
@@ -110,7 +122,13 @@ public class BeaconClickListener implements Listener {
                     int z = ((Long) locationObject.get("Z")).intValue();
                     String worldName = (String) locationObject.get("World");
                     String netherStarName = (String) locationObject.get("NetherStarName");
-                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName, netherStarName));
+
+                    // Retrieve tier, experienceRequired, and experienceProgression from JSON
+                    int tier = ((Long) locationObject.get("Tier")).intValue();
+                    int experienceRequired = ((Long) locationObject.get("ExperienceRequired")).intValue();
+                    int experienceProgression = ((Long) locationObject.get("ExperienceProgression")).intValue();
+
+                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName, netherStarName, tier, experienceRequired, experienceProgression));
                 }
             }
         } catch (IOException | ParseException e) {

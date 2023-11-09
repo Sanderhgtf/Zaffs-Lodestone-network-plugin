@@ -11,32 +11,24 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-//
+
 public class GhostLodestoneCleaner {
-
-    ///
-
-    private final String dataFilePath = "plugins/Test123/lodestone_data.json"; // Define dataFilePath here
+    private final String dataFilePath = "plugins/Test123/lodestone_data.json";
 
     public void cleanUp(List<LodestoneCoordinate> lodestoneCoordinates, World world) {
-        // Create a list to store ghost lodestones to remove
         List<Location> ghostLodestonesToRemove = new ArrayList<>();
 
-        // Iterate through the coordinates
         for (LodestoneCoordinate coordinate : lodestoneCoordinates) {
             Location location = coordinate.getLocation();
 
-            // Debugging output
             Bukkit.getConsoleSender().sendMessage("Checking location: " + location);
 
-            // Check if a lodestone exists at the stored location in the world
             if (location.getBlock().getType() != Material.LODESTONE) {
                 Bukkit.getConsoleSender().sendMessage("Ghost lodestone found at: " + location);
                 ghostLodestonesToRemove.add(location);
             }
         }
 
-        // Remove the ghost lodestones
         for (Location locationToRemove : ghostLodestonesToRemove) {
             removeGhostLodestone(locationToRemove, world, lodestoneCoordinates);
         }
@@ -49,21 +41,17 @@ public class GhostLodestoneCleaner {
         for (LodestoneCoordinate coordinate : lodestoneCoordinates) {
             if (coordinate.getLocation().equals(location) && coordinate.getWorldName().equals(world.getName())) {
                 lodestoneToRemove = coordinate;
-                break; // No need to continue searching
+                break;
             }
         }
 
         if (lodestoneToRemove != null) {
             lodestoneCoordinates.remove(lodestoneToRemove);
-
-            // Save the updated coordinates to the JSON file
             saveCoordinatesToJson(lodestoneCoordinates);
-
             Bukkit.getConsoleSender().sendMessage("Removed ghost lodestone at: " + location);
         }
     }
 
-    // Method to save the updated coordinates to the JSON file
     private void saveCoordinatesToJson(List<LodestoneCoordinate> lodestoneCoordinates) {
         JSONArray jsonArray = new JSONArray();
         for (LodestoneCoordinate lodestone : lodestoneCoordinates) {
@@ -74,6 +62,9 @@ public class GhostLodestoneCleaner {
             locationObject.put("Z", location.getBlockZ());
             locationObject.put("World", lodestone.getWorldName());
             locationObject.put("NetherStarName", lodestone.getNetherStarName());
+            locationObject.put("Tier", lodestone.getTier());  // Include tier in JSON
+            locationObject.put("ExperienceRequired", lodestone.getExperienceRequired());  // Include experienceRequired in JSON
+            locationObject.put("ExperienceProgression", lodestone.getExperienceProgression());  // Include experienceProgression in JSON
             jsonArray.add(locationObject);
         }
 
@@ -81,6 +72,7 @@ public class GhostLodestoneCleaner {
             jsonArray.writeJSONString(fileWriter);
         } catch (IOException e) {
             e.printStackTrace();
+            Bukkit.getConsoleSender().sendMessage("Error saving coordinates to JSON: " + e.getMessage());
         }
     }
 }

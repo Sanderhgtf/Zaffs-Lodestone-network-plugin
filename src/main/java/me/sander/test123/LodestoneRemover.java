@@ -16,9 +16,8 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-//
-public class LodestoneRemover implements Listener {
 
+public class LodestoneRemover implements Listener {
     private final String dataFilePath = "plugins/Test123/lodestone_data.json";
     private List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
     private GhostLodestoneCleaner ghostLodestoneCleaner;
@@ -36,32 +35,24 @@ public class LodestoneRemover implements Listener {
             String worldName = location.getWorld().getName();
 
             if (removeCoordinatesFromJson(location, worldName)) {
-
                 location.getWorld().dropItemNaturally(location, new ItemStack(Material.NETHER_STAR));
-
                 Bukkit.getLogger().info("This lodestone had stored data which is now removed");
-
                 sendActionBarMessage(player, ChatColor.GOLD + "Lodestone disassembled..");
 
                 int radius = 15;
-
                 for (Player nearbyPlayer : location.getWorld().getPlayers()) {
                     if (nearbyPlayer.getLocation().distance(location) <= radius) {
                         int durationSeconds = 2;
                         int durationTicks = durationSeconds * 20;
-
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, durationTicks, 5));
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, durationTicks, 5));
                         nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, durationTicks, 2));
-
-                        // Play a sound for nearby players
                         nearbyPlayer.playSound(location, Sound.AMBIENT_SOUL_SAND_VALLEY_ADDITIONS, 2.0F, 0.8F);
                         nearbyPlayer.playSound(location, Sound.PARTICLE_SOUL_ESCAPE, 4.0F, 0.6F);
                     }
                 }
 
                 ghostLodestoneCleaner.cleanUp(lodestoneCoordinates, location.getWorld());
-
                 PluginReloader.reloadPlugin(Test123.getPlugin(Test123.class));
             } else {
                 Bukkit.getLogger().info("This lodestone does not have stored data.");
@@ -94,6 +85,9 @@ public class LodestoneRemover implements Listener {
             locationObject.put("Z", location.getBlockZ());
             locationObject.put("World", lodestone.getWorldName());
             locationObject.put("NetherStarName", lodestone.getNetherStarName());
+            locationObject.put("Tier", lodestone.getTier());  // Include tier in JSON
+            locationObject.put("ExperienceRequired", lodestone.getExperienceRequired());  // Include experienceRequired in JSON
+            locationObject.put("ExperienceProgression", lodestone.getExperienceProgression());  // Include experienceProgression in JSON
             jsonArray.add(locationObject);
         }
 
@@ -117,7 +111,10 @@ public class LodestoneRemover implements Listener {
                     int z = ((Long) locationObject.get("Z")).intValue();
                     String worldName = (String) locationObject.get("World");
                     String netherStarName = (String) locationObject.get("NetherStarName");
-                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName, netherStarName));
+                    int tier = ((Long) locationObject.get("Tier")).intValue();  // Retrieve tier from JSON
+                    int experienceRequired = ((Long) locationObject.get("ExperienceRequired")).intValue();  // Retrieve experienceRequired from JSON
+                    int experienceProgression = ((Long) locationObject.get("ExperienceProgression")).intValue();  // Retrieve experienceProgression from JSON
+                    lodestoneCoordinates.add(new LodestoneCoordinate(new Location(Bukkit.getWorld(worldName), x, y, z), worldName, netherStarName, tier, experienceRequired, experienceProgression));
                 }
             }
         } catch (IOException | ParseException e) {
