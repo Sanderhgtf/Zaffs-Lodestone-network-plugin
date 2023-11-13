@@ -27,6 +27,7 @@ public final class Test123 extends JavaPlugin {
             }
         }
 
+
         // Create a list of LodestoneCoordinate data and add your data as needed
         List<LodestoneCoordinate> lodestoneCoordinates = new ArrayList<>();
         // Add your LodestoneCoordinate objects to the list as needed
